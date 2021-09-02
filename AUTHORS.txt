@@ -1,0 +1,20 @@
+Development Time: 3 weeks.
+University of Sheffield Project from:
+
+Nikolaos Lintas - https://www.linkedin.com/in/nikos-li-computer-science-971130209/ - https://github.com/nlintas
+    - Assistant Full-Stack Developer
+    - Testing
+    - Discrete Mathematics to Promela Interpreter (Linear Temporal Logic)
+
+Phillip Kalatzis - https://www.linkedin.com/in/phillipos-andrianos-k-968454119/
+    - Full-Stack Developer
+    - Testing
+
+Thomas Papantoniou
+    - Documentation
+
+Katerina Matraku
+    - Documentation
+
+Kostandin Dervishaj
+    - Documentation

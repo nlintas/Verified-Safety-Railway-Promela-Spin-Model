@@ -1,0 +1,719 @@
+
+<!-- saved from url=(0076)https://courses.cs.washington.edu/courses/csep590/03su/Lectures/Promela.html -->
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body bgcolor="#ffffff" lang="EN-US" link="blue" vlink="blue" style="tab-interval:.5in">
+
+
+
+
+<meta name="ProgId" content="Word.Document">
+<meta name="Generator" content="Microsoft Word 9">
+<meta name="Originator" content="Microsoft Word 9">
+<link rel="File-List" href="https://courses.cs.washington.edu/courses/csep590/03su/Lectures/Promela_manual_files/filelist.xml">
+<title>Basic Spin Manual</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>David Richardson</o:Author>
+  <o:Template>Normal</o:Template>
+  <o:LastAuthor>David Richardson</o:LastAuthor>
+  <o:Revision>13</o:Revision>
+  <o:TotalTime>4</o:TotalTime>
+  <o:Created>2003-09-05T22:20:00Z</o:Created>
+  <o:LastSaved>2003-09-05T22:24:00Z</o:LastSaved>
+  <o:Pages>11</o:Pages>
+  <o:Words>3555</o:Words>
+  <o:Characters>20268</o:Characters>
+  <o:Company>University of Washington</o:Company>
+  <o:Lines>168</o:Lines>
+  <o:Paragraphs>40</o:Paragraphs>
+  <o:CharactersWithSpaces>24890</o:CharactersWithSpaces>
+  <o:Version>9.2720</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+@font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:2;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:0 268435456 0 0 -2147483648 0;}
+ /* Style Definitions */
+p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+p
+	{font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+pre
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:10.0pt;
+	font-family:"Courier New";
+	mso-fareast-font-family:"Courier New";}
+tt
+	{mso-ascii-font-family:"Courier New";
+	mso-fareast-font-family:"Courier New";
+	mso-hansi-font-family:"Courier New";
+	mso-bidi-font-family:"Courier New";}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+@list l0
+	{mso-list-id:2082438453;
+	mso-list-type:hybrid;
+	mso-list-template-ids:1042714742 -1774531442 -434108818 -304998792 1258580416 1845528792 1645006706 -547212646 -1273998090 -603168178;}
+@list l0:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:.5in;
+	mso-level-number-position:left;
+	text-indent:-.25in;
+	mso-ansi-font-size:10.0pt;
+	font-family:Symbol;}
+ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+
+
+
+<div class="Section1">
+
+<h2>Promela Manual (extracted from Spin Manual at <a href="http://spinroot.com/spin/Man/Manual.html">http://spinroot.com/spin/Man/Manual.html</a>)</h2>
+
+<p><tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Promela</span></i></tt>
+is a verification modeling language. It provides a vehicle for making
+abstractions of protocols (or distributed systems in general) that suppress
+details that are unrelated to process interaction. The intended use of <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Spin</span></i></tt> is to
+verify fractions of process behavior, that for one reason or another are
+considered suspect. The relevant behavior is modeled in <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Promela</span></i></tt> and
+verified. A complete verification is therefore typically performed in a series
+of steps, with the construction of increasingly detailed <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Promela</span></i></tt>
+models. Each model can be verified with <tt><i><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">Spin</span></i></tt> under different types of
+assumptions about the environment (e.g., message loss, message duplications
+etc). Once the correctness of a model has been established with <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Spin</span></i></tt>, that
+fact can be used in the construction and verification of all subsequent models.
+</p>
+
+<p><tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Promela</span></i></tt>
+programs consist of <i>processes</i>, message <i>channels</i>, and <i>variables</i>.
+Processes are global objects. Message channels and variables can be declared
+either globally or locally within a process. Processes specify behavior,
+channels and global variables define the environment in which the processes
+run. </p>
+
+<h3>Executability</h3>
+
+<p>In <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Promela</span></i></tt>
+there is no difference between conditions and statements, even isolated boolean
+conditions can be used as statements. The execution of every statement is
+conditional on its <i>executability . </i>Statements are either executable or
+blocked. The executability is the basic means of synchronization. A process can
+wait for an event to happen by waiting for a statement to become executable.
+For instance, instead of writing a busy wait loop: </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>while (a != b)</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>skip<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp; </span>/* wait for a==b */</pre>
+
+<p class="MsoNormal">one can achieve the same effect in <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Promela</span></i></tt> with
+the statement </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(a == b)</pre>
+
+<p class="MsoNormal">A condition can only be executed (passed) when it holds. If
+the condition does not hold, execution blocks until it does. </p>
+
+<p>Variables are used to store either global information about the system as a
+whole, or information local to one specific process, depending on where the
+declaration for the variable is placed. The declarations </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>bool flag;</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>int state;</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>byte msg;</pre>
+
+<p class="MsoNormal">define variables that can store integer values in three
+different ranges. The scope of a variable is global if it is declared outside
+all process declarations, and local if it is declared within a process
+declaration. </p>
+
+<h3>Data Types</h3>
+
+<p>The table below summarizes the basic data types, sizes, and the
+corresponding value ranges (on a DEC VAX computer). </p>
+
+<p class="MsoNormal" align="center" style="text-align:center"><b>Table 1 - Data
+Types</b><o:p></o:p></p>
+
+<table border="1" cellpadding="0" style="mso-cellspacing:1.5pt" cols="4">
+ <tbody><tr>
+  <td width="100" valign="top" style="width:75.0pt;padding:.75pt .75pt .75pt .75pt">
+  <p class="MsoNormal"><b>Typename</b><br>
+  <vline>bit or bool<br>
+  byte<br>
+  short<br>
+  int</vline></p>
+  </td>
+  <td width="100" valign="top" style="width:75.0pt;padding:.75pt .75pt .75pt .75pt">
+  <p class="MsoNormal"><b>C-equivalent</b><br>
+  bit-field<br>
+  uchar<br>
+  short<br>
+  int</p>
+  </td>
+  <td width="200" valign="top" style="width:150.0pt;padding:.75pt .75pt .75pt .75pt">
+  <p class="MsoNormal"><b>Macro in limits.h</b><br>
+  -<br>
+  CHAR_BIT (width in bits)<br>
+  SHRT_MIN..SHRT_MAX<br>
+  INT_MIN..INT_MAX</p>
+  </td>
+  <td width="500" valign="top" style="width:375.0pt;padding:.75pt .75pt .75pt .75pt">
+  <p class="MsoNormal"><b>Typical Range</b><br>
+  0..1<br>
+  0..255<br>
+  -2^15 - 1 .. 2^15 - 1<br>
+  -2^31 - 1 .. 2^31 - 1</p>
+  </td>
+ </tr>
+</tbody></table>
+
+<p>The names <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">bit</span></tt>
+and <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">bool</span></tt>
+are synonyms for a single bit of information. A <tt><span style="font-size:
+10.0pt;font-family:&quot;Courier New&quot;">byte</span></tt> is an unsigned quantity that
+can store a value between 0 and 255. <tt><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">short</span></tt>s and <tt><span style="font-size:
+10.0pt;font-family:&quot;Courier New&quot;">int</span></tt>s are signed quantities that
+differ only in the range of values they can hold. </p>
+
+<p>An <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">mtype</span></tt>
+variable can be assigned symbolic values that are declared in an <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">mtype = { ... }</span></tt>
+statement, to be discussed below. </p>
+
+<h3>Array Variables</h3>
+
+<p>Variables can be declared as arrays. For instance, </p>
+
+<pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>byte state[N]</pre>
+
+<p class="MsoNormal"><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></p>
+
+<p class="MsoNormal">declares an array of <tt><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">N</span></tt> bytes that can be accessed in
+statements such as </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>state[0] = state[3] + 5 * state[3*2/n]</pre>
+
+<p class="MsoNormal"><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></p>
+
+<p class="MsoNormal">where<tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">n</span></tt>
+is a constant or a variable declared elsewhere. The index to an array can be
+any expression that determines a unique integer value. The effect of an index
+value outside the range 0.. N-1 is undefined; most likely it will cause a
+runtime error. (Multi-dimensional arrays can be defined indirectly with the
+help of the <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">typedef</span></tt>
+construct) </p>
+
+<p>So far we have seen examples of variable declarations and of two types of
+statements: boolean conditions and assignments. Declarations and assignments
+are always <i>executable</i>. Conditions are only executable when they hold. </p>
+
+<h3>Process Types</h3>
+
+<p>The state of a variable or of a message channel can only be changed or
+inspected by processes. The behavior of a process is defined in a <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">proctype</span></tt>
+declaration. The following, for instance, declares a process with one local
+variable <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">state</span></tt>.
+</p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype A()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>byte state;</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>state = 3</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p class="MsoNormal">The process type is named <tt><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">A</span></tt>. The body of the declaration is
+enclosed in curly braces. The declaration body consists of a list of zero or
+more declarations of local variables and/or statements. The declaration above
+contains one local variable declaration and a single statement: an assignment
+of the value 3 to variable <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">state</span></tt>.
+</p>
+
+<p>The semicolon is a statement <i>separator</i> (not a statement terminator,
+hence there is no semicolon after the last statement). <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Promela</span></i></tt>
+accepts two different statement separators: an arrow <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">`-&gt;'</span></tt>and the
+semicolon <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">`;'</span></tt>.
+The two statement separators are equivalent. The arrow is sometimes used as an
+informal way to indicate a causal relation between two statements. Consider the
+following example. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>byte state = 2;</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype A()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(state == 1) -&gt; state = 3</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype B()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>state = state - 1</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p class="MsoNormal">In this example we declared two types of processes, <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">A</span></tt> and <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">B</span></tt>. Variable <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">state</span></tt> is now a
+global, initialized to the value two. Process type <tt><span style="font-size:
+10.0pt;font-family:&quot;Courier New&quot;">A</span></tt> contains two statements,
+separated by an arrow. In the example, process declaration <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">B</span></tt> contains a
+single statement that decrements the value of the state variable by one. Since
+the assignment is always executable, processes of type <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">B</span></tt> can always
+complete without delay. Processes of type <tt><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">A</span></tt>, however, are delayed at the condition
+until the variable <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">state</span></tt>
+contains the proper value. </p>
+
+<h3>Process Instantiation</h3>
+
+<p>A <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">proctype</span></tt>
+definition only declares process behavior, it does not execute it. Initially,
+in the <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Promela</span></i></tt>
+model, just one process will be executed: a process of type <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">init</span></tt>, that must
+be declared explicitly in every <tt><i><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">Promela</span></i></tt> specification. The smallest
+possible <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Promela</span></i></tt>
+specification, therefore, is: </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>init { skip }</pre>
+
+<p class="MsoNormal">where <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">skip</span></tt>
+is a dummy, null statement. More interestingly, however, the initial process
+can initialize global variables, and instantiate processes. An <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">init</span></tt> declaration
+for the above system, for instance, could look as follows. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>init</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run A(); run B()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p><tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">run</span></tt>
+is used as a unary operator that takes the name of a process type (e.g. <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">A</span></tt>). It is
+executable only if a process of the type specified can be instantiated. It is
+unexecutable if this cannot be done, for instance if too many processes are
+already running. </p>
+
+<p>The run statement can pass parameter values of all basic data types to the
+new process. The declarations are then written, for instance, as follows: </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype A(byte state; short foo)</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(state == 1) -&gt; state = foo</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>init</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run A(1, 3)</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p class="MsoNormal">Data arrays or process types can not be passed as
+parameters. As we will see below, there is just one other data type that can be
+used as a parameter: a message channel. </p>
+
+<p>Run statements can be used in any process to spawn new processes, not just
+in the initial process. Processes are created with the <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">run</span></tt> statements.
+An executing process disappears again when it terminates (i.e., reaches the end
+of the body of its process type declaration), but not before all processes that
+it started have terminated. </p>
+
+<p>With the <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">run</span></tt>
+statement we can create any number of copies of the process types <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">A</span></tt> and <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">B</span></tt>. If, however,
+more than one concurrent process is allowed to both read and write the value of
+a global variable a well-known set of problems can result; for example see [2].
+Consider, for instance, the following system of two processes, sharing access
+to the global variable <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">state</span></tt>.
+</p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>byte state = 1;</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype A()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>byte tmp;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(state==1) -&gt; tmp = state; tmp = tmp+1; state = tmp</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype B()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>byte tmp;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(state==1) -&gt; tmp = state; tmp = tmp-1; state = tmp</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>init</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run A(); run B()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p class="MsoNormal">If one of the two processes completes before its competitor
+has started, the other process will block forever on the initial condition. If
+both pass the condition simultaneously, both will complete, but the resulting
+value of <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">state</span></tt>
+is unpredictable. It can be any of the values 0, 1, or 2. </p>
+
+<p>Many solutions to this problem have been considered, ranging from an
+abolishment of global variables to the provision of special machine
+instructions that can guarantee an indivisible test and set sequence on a
+shared variable. The example below was one of the first solutions published. It
+is due to the Dutch mathematician Dekker. It grants two processes mutually
+exclusion access to an arbitrary <i>critical section </i>in their code, by
+manipulation three additional global variables. The first four lines in the <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Promela</span></i></tt>
+specification below are C-style macro definitions. The first two macros define <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">true</span></tt> to be a
+constant value equal to 1 and <i>false</i> to be a constant 0. Similarly, <i>Aturn</i>
+and <i>Bturn</i> are defined as constants. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>#define true<span style="mso-tab-count:1">&nbsp;&nbsp; </span>1</pre><pre><span style="mso-tab-count:
+1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>#define false<span style="mso-tab-count:1">&nbsp; </span>0</pre><pre><span style="mso-tab-count:
+1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>#define Aturn<span style="mso-tab-count:1">&nbsp; </span>false</pre><pre><span style="mso-tab-count:
+1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>#define Bturn<span style="mso-tab-count:1">&nbsp; </span>true</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>bool x, y, t;</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype A()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>x = true;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>t = Bturn;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(y == false || t == Aturn);</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>/* critical section */</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>x = false</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype B()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>y = true;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>t = Aturn;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(x == false || t == Bturn);</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>/* critical section */</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>y = false</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>init</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run A(); run B()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p class="MsoNormal">The algorithm can be executed repeatedly and is independent
+of the relative speeds of the two processes. </p>
+
+<h3>Atomic Sequences</h3>
+
+<p>In <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Promela</span></i></tt>
+there is also another way to avoid the <i>test and set</i> problem: <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">atomic</span></tt>
+sequences. By prefixing a sequence of statements enclosed in curly braces with
+the keyword <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">atomic</span></tt>
+the user can indicate that the sequence is to be executed as one indivisible
+unit, non-interleaved with any other processes. It causes a run-time error if
+any statement, other than the first statement, blocks in an atomic sequence.
+This is how we can use atomic sequences to protect the concurrent access to the
+global variable <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">state</span></tt>
+in the earlier example. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>byte state = 1;</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype A()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>atomic {</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="mso-spacerun: yes">&nbsp; </span>(state==1) -&gt; state = state+1</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype B()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>atomic {</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="mso-spacerun: yes">&nbsp; </span>(state==1) -&gt; state = state-1</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>init</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run A(); run B()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p class="MsoNormal">In this case the final value of <tt><span style="font-size:
+10.0pt;font-family:&quot;Courier New&quot;">state</span></tt> is either zero or two,
+depending on which process executes. The other process will be blocked forever.
+</p>
+
+<p>Atomic sequences can be an important tool in reducing the complexity of
+verification models. Note that atomic sequence restricts the amount of
+interleaving that is allowed in a distributed system. Otherwise untractable
+models can be made tractable by, for instance, labeling all manipulations of
+local variables with atomic sequences. The reduction in complexity can be
+dramatic. </p>
+
+<h3>Message Passing</h3>
+
+<p>Message channels are used to model the transfer of data from one process to
+another. They are declared either locally or globally, for instance as follows:
+</p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan qname = [16] of { short }</pre>
+
+<p class="MsoNormal">This declares a channel that can store up to 16 messages of
+type <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">short</span></tt>.
+Channel names can be passed from one process to another via channels or as
+parameters in process instantiations. If the messages to be passed by the
+channel have more than one field, the declaration may look as follows: </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan qname = [16] of { byte, int, chan, byte }</pre>
+
+<p class="MsoNormal">This time the channel stores up to sixteen messages, each
+consisting of two 8-bit values, one 32-bit value, and a channel name. </p>
+
+<p>The statement </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>qname!expr</pre>
+
+<p class="MsoNormal">sends the value of expression <tt><span style="font-size:
+10.0pt;font-family:&quot;Courier New&quot;">expr</span></tt> to the channel that we just
+created, that is: it appends the value to the tail of the channel. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>qname?msg</pre>
+
+<p class="MsoNormal">receives the message, it retrieves it from the head of the
+channel, and stores it in a variable <tt><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">msg</span></tt>. The channels pass messages in
+first-in-first-out order. In the above cases only a single value is passed
+through the channel. If more than one value is to be transferred per message,
+they are specified in a comma separated list </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>qname!expr1,expr2,expr3</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>qname?var1,var2,var3</pre>
+
+<p class="MsoNormal">It is an error to send or receive either more or fewer
+parameters per message than was declared for the message channel used. <br>
+By convention, the first message field is often used to specify the message
+type (i.e. a constant). An alternative, and equivalent, notation for the send
+and receive operations is therefore to specify the message type, followed by a
+list of message fields enclosed in braces. In general: </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>qname!expr1(expr2,expr3)</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>qname?var1(var2,var3)</pre>
+
+<p>The send operation is executable only when the channel addressed is not
+full. The receive operation, similarly, is only executable when the channel is
+non empty. Optionally, some of the arguments of the receive operation can be
+constants: </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>qname?cons1,var2,cons2</pre>
+
+<p class="MsoNormal">in this case, a further condition on the executability of
+the receive operation is that the value of all message fields that are
+specified as constants match the value of the corresponding fields in the
+message that is at the head of the channel. Again, nothing bad will happen if a
+statement happens to be non-executable. The process trying to execute it will
+be delayed until the statement, or, more likely, an alternative statement,
+becomes executable. </p>
+
+<p>Here is an example that uses some of the mechanisms introduced so far. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype A(chan q1)</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan q2;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>q1?q2;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>q2!123</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype B(chan qforb)</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>int x;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>qforb?x;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>printf("x = %d\n", x)</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>init {</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan qname = [1] of { chan };</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan qforb = [1] of { int };</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run A(qname);</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run B(qforb);</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>qname!qforb</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p class="MsoNormal">The value printed will be ?????. </p>
+
+<p>A predefined function <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">len(qname)</span></tt>
+returns the number of messages currently stored in channel <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">qname</span></tt>. Note that
+if <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">len</span></tt>
+is used as a statement, rather than on the right hand side of an assignment, it
+will be unexecutable if the channel is empty: it returns a zero result, which
+by definition means that the statement is temporarily unexecutable. Composite
+conditions such as </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(qname?var == 0)<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>/* syntax error */</pre>
+
+<p class="MsoNormal">or </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(a &gt; b &amp;&amp; qname!123)<span style="mso-tab-count:1">&nbsp;&nbsp; </span>/* syntax error */</pre>
+
+<p class="MsoNormal">are invalid in <tt><i><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">Promela</span></i></tt> (note that these conditions
+can not be evaluated without side-effects). For a receive statement there is an
+alternative, using square brackets around the clause behind the question mark. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>qname?[ack,var]</pre>
+
+<p class="MsoNormal">is evaluated as a condition. It returns 1 if the
+corresponding receive statement </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>qname?ack,var</pre>
+
+<p class="MsoNormal">is executable, i.e., if there is indeed a message <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">ack</span></tt> at the head
+of the channel. It returns 0 otherwise. In neither case has the evaluation of a
+statement such as </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>qname?[ack,var]</pre>
+
+<p class="MsoNormal">any side-effects: the receive is evaluated, not executed. </p>
+
+<p>Note carefully that in non-atomic sequences of two statements such as </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(len(qname) &lt; MAX) -&gt; qname!msgtype</pre>
+
+<p class="MsoNormal">or </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>qname?[msgtype] -&gt; qname?msgtype</pre>
+
+<p class="MsoNormal">the second statement is not <i>necessarily</i> executable
+after the first one has been executed. There may be race conditions if access
+to the channels is shared between several processes. In the first case another
+process can send a message to channel <tt><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">qname</span></tt> just after this process determined
+that the channel was not full. In the second case, the other process can steal
+away the message just after our process determined its presence. </p>
+
+<h3>Rendez-Vous Communication (not covered in lecture)</h3>
+
+<p>So far we have talked about asynchronous communication between processes via
+message channels, declared in statements such as </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan qname = [N] of { byte }</pre>
+
+<p class="MsoNormal">where <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">N</span></tt>
+is a positive constant that defines the buffer size. A logical extension is to
+allow for the declaration </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan port = [0] of { byte }</pre>
+
+<p class="MsoNormal">to define a rendezvous port that can pass single byte
+messages. The channel size is zero, that is, the channel <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">port</span></tt> can pass,
+but can not store messages. Message interactions via such rendezvous ports are
+by definition synchronous. Consider the following example. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>#define msgtype 33</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan name = [0] of { byte, byte };</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype A()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>name!msgtype(124);</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>name!msgtype(121)</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype B()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>byte state;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>name?msgtype(state)</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>init</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>atomic { run A(); run B() }</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p class="MsoNormal">Channel <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">name</span></tt>
+is a global rendezvous port. The two processes will synchronously execute their
+first statement: a handshake on message <tt><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">msgtype</span></tt> and a transfer of the value 124
+to local variable <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">state</span></tt>.
+The second statement in process <tt><span style="font-size:10.0pt;font-family:
+&quot;Courier New&quot;">A</span></tt> will be unexecutable, because there is no matching
+receive operation in process <tt><span style="font-size:10.0pt;font-family:
+&quot;Courier New&quot;">B</span></tt>. </p>
+
+<p>If the channel <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">name</span></tt>
+is defined with a non-zero buffer capacity, the behavior is different. If the
+buffer size is at least 2, the process of type <tt><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">A</span></tt> can complete its execution, before its
+peer even starts. If the buffer size is 1, the sequence of events is as
+follows. The process of type <tt><span style="font-size:10.0pt;font-family:
+&quot;Courier New&quot;">A</span></tt> can complete its first send action, but it blocks
+on the second, because the channel is now filled to capacity. The process of
+type <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">B</span></tt>
+can then retrieve the first message and complete. At this point <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">A</span></tt> becomes
+executable again and completes, leaving its last message as a residual in the
+channel. </p>
+
+<p>Rendez-vous communication is binary: only two processes, a sender and a
+receiver, can be synchronized in a rendezvous handshake. We will see an example
+of a way to exploit this to build a semaphore below. But first, let us
+introduce a few more control flow structures that may be useful. </p>
+
+<h2><a name="C">Control Flow</a></h2>
+
+<p>Between the lines, we have already introduced three ways of defining control
+flow: concatenation of statements within a process, parallel execution of
+processes, and atomic sequences. There are three other control flow constructs
+in <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Promela</span></i></tt>
+to be discussed. They are case selection, repetition, and unconditional jumps. </p>
+
+<h3>Case Selection</h3>
+
+<p>The simplest construct is the selection structure. Using the relative values
+of two variables <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">a</span></tt>
+and <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">b</span></tt>
+to choose between two options, for instance, we can write: </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: (a != b) -&gt; option1</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: (a == b) -&gt; option2</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fi</pre>
+
+<p class="MsoNormal">The selection structure contains two execution sequences,
+each preceded by a double colon. Only one sequence from the list will be
+executed. A sequence can be selected only if its first statement is executable.
+The first statement is therefore called a <i>guard</i>. </p>
+
+<p>In the above example the guards are mutually exclusive, but they need not
+be. If more than one guard is executable, one of the corresponding sequences is
+selected nondeterministically. If all guards are unexecutable the process will
+block until at least one of them can be selected. There is no restriction on
+the type of statements that can be used as a guard. The following example, for
+instance, uses input statements. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>#define a 1</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>#define b 2</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan ch = [1] of { byte };</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype A()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>ch!a</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype B()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>ch!b</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype C()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: ch?a</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: ch?b</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fi</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>init</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>atomic { run A(); run B(); run C() }</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p class="MsoNormal">The example defines three processes and one channel. The
+first option in the selection structure of the process of type <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">C</span></tt> is executable
+if the channel contains a message <tt><span style="font-size:10.0pt;font-family:
+&quot;Courier New&quot;">a</span></tt>, where <tt><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">a</span></tt> is a constant with value 1, defined in
+a macro definition at the start of the program. The second option is executable
+if it contains a message <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">b</span></tt>,
+where, similarly, <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">b</span></tt>
+is a constant. Which message will be available depends on the unknown relative
+speeds of the processes. </p>
+
+<p>A process of the following type will either increment or decrement the value
+of variable <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">count</span></tt>
+once. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>byte count;</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype counter()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: count = count + 1</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: count = count - 1</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fi</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<h3>Repetition</h3>
+
+<p>A logical extension of the selection structure is the repetition structure.
+We can modify the above program as follows, to obtain a cyclic program that
+randomly changes the value of the variable up or down. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>byte count;</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype counter()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>do</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: count = count + 1</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: count = count - 1</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: (count == 0) -&gt; break</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>od</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p>Only one option can be selected for execution at a time. After the option
+completes, the execution of the structure is repeated. The normal way to
+terminate the repetition structure is with a <tt><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">break</span></tt> statement. In the example, the
+loop can be broken when the count reaches zero. Note, however, that it need not
+terminate since the other two options always remain executable. To force
+termination when the counter reaches zero, we could modify the program as
+follows. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype counter()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>do</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: (count != 0) -&gt;</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: count = count + 1</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: count = count - 1</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fi</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: (count == 0) -&gt; break</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>od</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<h3>Unconditional Jumps</h3>
+
+<p>Another way to break the loop is with an unconditional jump: the infamous <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">goto</span></tt> statement.
+This is illustrated in the following implementation of Euclid's algorithm for
+finding the greatest common divisor of two non-zero, positive numbers: </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype Euclid(int x, y)</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>do</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: (x &gt;<span style="mso-spacerun: yes">&nbsp; </span>y) -&gt; x = x - y</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: (x &lt;<span style="mso-spacerun: yes">&nbsp; </span>y) -&gt; y = y - x</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: (x == y) -&gt; goto done</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>od;</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>done:</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>skip</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p class="MsoNormal">The <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">goto</span></tt>
+in this example jumps to a label named done. A label can only appear before a
+statement. Above we want to jump to the end of the program. In this case a
+dummy statement <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">skip</span></tt>
+is useful: it is a place holder that is always executable and has no effect.
+The <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">goto</span></tt>
+is also always executable. </p>
+
+<p>The following example specifies a filter that receives messages from a
+channel <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">in</span></tt>
+and divides them over two channels large and small depending on the values
+attached. The constant <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">N</span></tt>
+is defined to be 128 and size is defined to be 16 in the two macro definitions.
+</p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>#define N<span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp; </span>128</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>#define size<span style="mso-spacerun: yes">&nbsp; </span>16</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan in<span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp; </span>= [size] of { short };</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan large = [size] of { short };</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan small = [size] of { short };</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype split()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>short cargo;</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>do</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: in?cargo -&gt;</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: (cargo &gt;= N) -&gt;</pre><pre><span style="mso-tab-count:4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>large!cargo</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: (cargo &lt;<span style="mso-spacerun: yes">&nbsp; </span>N) -&gt;</pre><pre><span style="mso-tab-count:4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>small!cargo</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fi</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>od</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>init</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run split()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p class="MsoNormal">A process type that merges the two streams back into one,
+most likely in a different order, and writes it back into the channel <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">in</span></tt> could be
+specified as follows. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype merge()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>short cargo;</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>do</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>::<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: large?cargo</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: small?cargo</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fi;</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>in!cargo</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>od</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p class="MsoNormal">If we now modify the <tt><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">init</span></tt> process as follows, the split and
+merge processes could busily perform their duties forever on. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>init</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>in!345; in!12; in!6777;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>in!32;<span style="mso-spacerun: yes">&nbsp; </span>in!0;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run split();</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run merge()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p>As a final example, consider the following implementation of a Dijkstra
+semaphore, using binary rendezvous communication. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>#define p<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>0</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>#define v<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>1</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan sema = [0] of { bit };</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype dijkstra()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>byte count = 1;</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>do</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: (count == 1) -&gt;</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>sema!p; count = 0</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: (count == 0) -&gt;</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>sema?v; count = 1</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>od<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype user()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>do</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: sema?p;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="mso-spacerun: yes">&nbsp;&nbsp; </span>/*<span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp;&nbsp; </span>critical section */</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="mso-spacerun: yes">&nbsp;&nbsp; </span>sema!v;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span style="mso-spacerun: yes">&nbsp;&nbsp; </span>/* non-critical section */</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>od</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>init</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run dijkstra();</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run user();</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run user();</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run user()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p class="MsoNormal">The semaphore guarantees that only one of the user processes
+can enter its critical section at a time. It does not necessarily prevent the
+monopolization of the access to the critical section by one of the processes. </p>
+
+<h3>Modeling Procedures and Recursion</h3>
+
+<p>Procedures can be modeled as processes, even recursive ones. The return
+value can be passed back to the calling process via a global variable, or via a
+message. The following program illustrates this. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype fact(int n; chan p)</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan child = [1] of { int };</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>int result;</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>if</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: (n &lt;= 1) -&gt; p!1</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: (n &gt;= 2) -&gt;</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run fact(n-1, child);</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>child?result;</pre><pre><span style="mso-tab-count:3">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>p!n*result</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>fi</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>init</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{<span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>chan child = [1] of { int };</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>int result;</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>run fact(7, child);</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>child?result;</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>printf("result: %d\n", result)</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<p class="MsoNormal">The process <i>fact(n, p) </i>recursively calculates the
+factorial of <i>n , </i>communicating the result via a message to its parent
+process <i>p . </i></p>
+
+<h3>Timeouts</h3>
+
+<p>We have already discussed two types of statement with a predefined meaning
+in <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Promela</span></i></tt>:
+<tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">skip</span></tt>,
+and <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">break</span></tt>.
+Another predefined statement is <tt><span style="font-size:10.0pt;font-family:
+&quot;Courier New&quot;">timeout</span></tt>. The <tt><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">timeout</span></tt> models a special condition that
+allows a process to abort the waiting for a condition that may never become
+true, e.g. an input from an empty channel. The timeout keyword is a modeling
+feature in <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Promela</span></i></tt>
+that provides an escape from a hang state. The timeout condition becomes true
+only when no other statements within the distributed system is executable. Note
+that we deliberately abstract from absolute timing considerations, which is
+crucial in verification work, and we do not specify how the timeout should be
+implemented. A simple example is the following process that will send a reset
+message to a channel named <i>guard</i> whenever the system comes to a
+standstill. </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>proctype watchdog()</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>{</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>do</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>:: timeout -&gt; guard!reset</pre><pre><span style="mso-tab-count:2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>od</pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>}</pre>
+
+<h3>Assertions</h3>
+
+<p>Another important language construct in <tt><i><span style="font-size:10.0pt;
+font-family:&quot;Courier New&quot;">Promela</span></i></tt> that needs little
+explanation is the <tt><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">assert</span></tt>
+statement. Statements of the form </p>
+
+<pre><!--[if !supportEmptyParas]-->&nbsp;<!--[endif]--><o:p></o:p></pre><pre><span style="mso-tab-count:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>assert(any_boolean_condition)</pre>
+
+<p class="MsoNormal">are always executable. If the boolean condition specified
+holds, the statement has no effect. If, however, the condition does not
+necessarily hold, the statement will produce an error report during
+verifications with <tt><i><span style="font-size:10.0pt;font-family:&quot;Courier New&quot;">Spin</span></i></tt>.
+</p>
+
+<h2><a name="A">Advanced Usage</a></h2>
+
+<h2>See <a href="http://spinroot.com/spin/Man/Manual.html">http://spinroot.com/spin/Man/Manual.html</a>
+for more details on Promela <span style="font-family:Wingdings;mso-ascii-font-family:
+&quot;Times New Roman&quot;;mso-hansi-font-family:&quot;Times New Roman&quot;;mso-char-type:symbol;
+mso-symbol-font-family:Wingdings"><span style="mso-char-type:symbol;mso-symbol-font-family:
+Wingdings">J</span></span></h2>
+
+</div>
+
+
+
+
+</body></html>
