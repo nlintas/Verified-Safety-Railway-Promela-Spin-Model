@@ -6,7 +6,7 @@ Nikolaos Lintas - https://www.linkedin.com/in/nikos-li-computer-science-97113020
     - Testing
     - Discrete Mathematics to Promela Interpreter (Linear Temporal Logic)
 
-Phillip Kalatzis - https://www.linkedin.com/in/phillipos-andrianos-k-968454119/
+Phillip Kalatzis - https://www.linkedin.com/in/phillipos-andrianos-k-968454119/ - https://github.com/SuperBugX
     - Full-Stack Developer
     - Testing
 
