@@ -6,6 +6,41 @@ TerminalLine: a verified circular railway model
 TerminalLine is a small railway safety model written in Promela for the SPIN
 model checker.
 
+### System at a glance
+
+The top layer is the physical railway and clockwise train flow.  The lower
+layer is the signalling network: each signal box controls its local station
+and sends tunnel-release notifications to the box behind it.
+
+```mermaid
+flowchart TB
+    subgraph Railway["Physical railway: clockwise train flow"]
+        direction LR
+        S1["Station 1"] -->|"Tunnel_1_2"| S2["Station 2"]
+        S2 -->|"Tunnel_2_3"| S3["Station 3"]
+        S3 -->|"Tunnel_3_4"| S4["Station 4"]
+        S4 -->|"Tunnel_4_1"| S1
+    end
+
+    subgraph Signalling["Signalling: local control and rearward release"]
+        direction LR
+        B1["Signal box 1"] -->|"signalbox4_1"| B4["Signal box 4"]
+        B4 -->|"signalbox3_4"| B3["Signal box 3"]
+        B3 -->|"signalbox2_3"| B2["Signal box 2"]
+        B2 -->|"signalbox1_2"| B1
+    end
+
+    S1 -.->|"local request / response"| B1
+    S2 -.->|"local request / response"| B2
+    S3 -.->|"local request / response"| B3
+    S4 -.->|"local request / response"| B4
+
+    classDef station fill:#dbeafe,stroke:#2563eb,color:#111827;
+    classDef box fill:#dcfce7,stroke:#16a34a,color:#111827;
+    class S1,S2,S3,S4 station;
+    class B1,B2,B3,B4 box;
+```
+
 The railway has:
 
 - four stations, numbered 1 to 4;
