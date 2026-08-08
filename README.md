@@ -175,7 +175,17 @@ Then either double-click `verify_on_macos.command` in Finder or run:
 macOS opens a Terminal window and runs the short verification suite.  It checks
 normal safety, deadlock/assertion behavior, initial movement, fair request
 response, and bounded reservation consistency.  The window reports `ALL CHECKS
-PASSED` when every check returns successfully.
+PASSED` when every check returns successfully.  Before the verifier exits, it
+also writes a timestamped Markdown report and the full log for every check to:
+
+    Verification Reports/YYYY-MM-DD_HH-MM-SS-PID/verification-report.md
+
+The report records the model revision, SPIN version, host, commands, run times,
+search method, states stored, transitions explored, maximum depth, error count,
+memory use, the scope of each result, and a railway topology diagram.  It
+distinguishes the exhaustive checks from the deliberately sampled `p4` bitstate
+smoke test and the depth-bounded `p3` consistency check.  Generated reports are
+ignored by Git so repeated local verification does not dirty the working tree.
 
 The script automatically searches Apple Silicon Homebrew's usual location
 `/opt/homebrew/bin`, so it also works when Finder does not load your normal

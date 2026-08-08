@@ -10,3 +10,6 @@ Icon?
 .DocumentRevisions-V100
 .TemporaryItems
 .apdisk
+
+# Timestamped artifacts written by the clickable verification suite
+Verification Reports/
