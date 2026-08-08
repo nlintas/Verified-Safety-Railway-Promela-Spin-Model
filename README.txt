@@ -278,9 +278,11 @@ that it reported zero errors before stopping.  Remove `-m80` for an exhaustive
 
 Inspect one bounded execution trace:
 
-    spin -p -g -l -u120 -n7 Source/TerminalLine.pml
+spin -p -g -l -u120 -n7 Source/TerminalLine.pml
 
-The checks used during the verification expansion reported:
+### Final verification results (SPIN 6.5.2 on macOS)
+
+The final `verify_on_macos.command` run reported:
 
 - `p1`: 1,057,180 stored states, zero errors;
 - DFS deadlock/assertion search: 1,825,044 stored states, zero errors;
